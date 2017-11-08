@@ -14,3 +14,7 @@ mkUniq :: Ord a => [a] -> [a]
 mkUniq = toList . fromList
 
 fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
+
+nth_central_binomial_coefficient n = factorial(2*n) / factorial(n)**2
+
+ 
