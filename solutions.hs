@@ -1,6 +1,9 @@
---
--- HELPERS
---
+import Data.List (find)
+import Data.Maybe (isNothing)
+
+--------------------------------------------------------------------------------------------------------------------
+-- HELPERS ---------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
 
 -- https://stackoverflow.com/questions/23944533/my-haskell-solution-to-euler-3-is-inefficient/23944933#23944933
 prime_factor = go (2:[3,5..]) where
@@ -15,26 +18,55 @@ fibs = 0 : 1 : zipWith (+) fibs (tail fibs)
 
 nth_central_binomial_coefficient n = factorial(2*n) / factorial(n)**2
 
+get_factors n = [x | x <- [1..n], n `mod` x == 0]
+get_factor_pairs [] = []
+get_factor_pairs [x] = []
+get_factor_pairs (x:xs) =  [(x, last xs)] ++ get_factor_pairs (init xs)
+
+--------------------------------------------------------------------------------------------------------------------
+-- SOLUTIONS -------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
+
 --
--- SOLUTIONS
+-- Problem 1
 --
 
 solve_problem_1 = sum [x | x <- [1..999], x `mod` 5 == 0 || x `mod` 3 == 0]
 
+--
+-- Problem 2
+--
+
 solve_problem_2 = sum [x | x <- takeWhile(<4000000) fibs, x `mod` 2 == 0]
+
+--
+-- Problem 3
+--
 
 solve_problem_3 = maximum (prime_factor 600851475143)
 
+--
+-- Problem 4
+--
+
 solve_problem_4 = maximum [x | x <- [x*y | x <- [1..999], y <- [1..999]], show x == reverse(show x)]
+
+--
+-- Problem 5
+--
 
 solve_problem_5 = foldr1 lcm [1..20]
 
+--
+-- Problem 6
+--
+
 solve_problem_6 = sum([1..100])^2 - sum [x | x <- map(^2) [1..100]]
 
--- max_product = 0
--- solve_problem_8 = 
---   let max_product = 1
---   in max_product
+--
+-- Problem 8
+--
+
 max_product_in_series :: [Char] -> Int -> Int -> Int
 max_product_in_series [] maxp n = maxp
 max_product_in_series xs maxp n = 
@@ -42,12 +74,36 @@ max_product_in_series xs maxp n =
       p = foldr1 (*) arr_n_nums
       new_max = max maxp p
   in max p (max_product_in_series (drop 1 xs) new_max n)
-
+-- should not calculate products for a series that contains a 0
 solve_problem_8 = max_product_in_series problem_8_number 0 13
 
 --
+-- Problem 9
+--
+
+-- Dickson's Method
+-- https://en.wikipedia.org/wiki/Formulas_for_generating_Pythagorean_triples
+make_triple r (s, t) = 
+  let x = r + s
+      y = r + t
+      z = r + s + t
+  in (x, y, z)
+generate_triples r = 
+  let k = r^2 `div` 2
+      factors = get_factors k
+      factor_pairs = get_factor_pairs factors
+  in map (\pair -> make_triple r pair) factor_pairs
+
+solve_problem_9 = 
+  let triples = concat (map (\x -> generate_triples x) [1..])
+      triple_that_adds_to_1000 = find (\(a, b, c) -> a+b+c == 1000) triples
+      abc_product (Just (a, b, c)) = a*b*c
+  in abc_product triple_that_adds_to_1000
+
+
+
+--
 -- Problem 13
--- By implementing arithmetic 
 --
 
 add_reversed_str_numbers :: [Char] -> [Char] -> Int -> [Char]
@@ -82,9 +138,9 @@ solve_problem_13 = take 10 (sum_list_of_large_nums problem_13_numbers)
 solve_problem_15 = nth_central_binomial_coefficient(20)
 
 
---
--- Problem Data
---
+--------------------------------------------------------------------------------------------------------------------
+-- PROBLEM DATA ----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------
 
 problem_8_number = "73167176531330624919225119674426574742355349194934\
 \96983520312774506326239578318016984801869478851843\
